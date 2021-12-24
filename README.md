@@ -1,6 +1,6 @@
 # Supported tags and respective `Dockerfile` links
-  -	[`steam`, `latest` (*buster/Dockerfile*)](https://github.com/CM2Walki/steamcmd/blob/master/buster/Dockerfile)
-  -	[`root` (*buster-root/Dockerfile*)](https://github.com/CM2Walki/steamcmd/blob/master/buster-root/Dockerfile)
+  -	[`steam` (*buster/Dockerfile*)](https://github.com/crutonjohn/steamcmd-autopilot/blob/main/steamcmd/Dockerfile)
+  -	[`root` (*buster-root/Dockerfile*)](https://github.com/crutonjohn/steamcmd-autopilot/blob/main/steamcmd-root/Dockerfile)
 
 # What is SteamCMD-Autopilot?
 
