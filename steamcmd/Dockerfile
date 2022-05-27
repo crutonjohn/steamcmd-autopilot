@@ -1,31 +1,54 @@
-FROM cm2network/steamcmd:root
+FROM ghcr.io/k8s-at-home/ubuntu:latest
 
-LABEL maintainer="crutonjohn@pm.me"
-ARG PUID=1000
+USER root
 
-ENV USER steam
-ENV HOMEDIR "/home/${USER}"
-ENV STEAMCMDDIR "${HOMEDIR}/steamcmd"
+ENV APPDIR /app
 
-RUN apt-get update \
-    && apt-get install expect -y \
-    && apt-get remove --purge -y \
-	wget \
-    && apt-get clean autoclean \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+COPY ./entrypoint.sh ${APPDIR}
+COPY ./*.exp ${APPDIR}
 
-USER ${USER}
+RUN \
+  apt-get -qq update \
+  && \
+  dpkg --add-architecture i386 \
+  && \
+  apt update \
+  && \
+  apt-get -qq install -y \
+    lib32gcc-s1 \
+    wget \
+  && mkdir -p ${APPDIR}/.steam/sdk32 \
+  && mkdir -p ${APPDIR}/linux32 \
+  && mkdir -p ${APPDIR}/linux64 \
+  && ln -s ${APPDIR}/linux32/steamclient.so ${APPDIR}/.steam/sdk32/steamclient.so \
+  && ln -s ${APPDIR}/linux32/steamcmd ${APPDIR}/linux32/steam \
+  && ln -s ${APPDIR}/steamcmd.sh ${APPDIR}/steam.sh \
+  && ln -s ${APPDIR}/linux64/steamclient.so /usr/lib/x86_64-linux-gnu/steamclient.so \
+  && wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar xvzf - -C "${APPDIR}" \
+  && chown -R kah:kah /app \
+  && \
+  apt-get remove --purge --auto-remove -y \
+    wget \
+    software-properties-common \
+  && \
+  apt-get autoremove -y \
+  && apt-get clean \
+  && \
+  rm -rf \
+    /tmp/* \
+    /var/lib/apt/lists/* \
+    /var/tmp/ \
+  && chown -R kah:kah /app \
+  && chmod -R u=rwX,go=rX /app \
+  && printf "umask %d" "${UMASK}" >> /etc/bash.bashrc \
+  && update-ca-certificates \
+  && chmod +x ${APPDIR}/entrypoint.sh \
+  && chmod +x ${APPDIR}/anon.exp \
+  && chmod +x ${APPDIR}/login.exp
 
-WORKDIR ${STEAMCMDDIR}
+USER kah
 
-COPY --chown=${USER}:${USER} ./start.sh ${STEAMCMDDIR}
-COPY --chown=${USER}:${USER} ./*.exp ${STEAMCMDDIR}
+RUN \
+  ${APPDIR}/steamcmd.sh +force_install_dir ${APPDIR} +quit
 
-RUN chmod +x ${STEAMCMDDIR}/start.sh \
-    && chmod +x ${STEAMCMDDIR}/anon.exp \
-    && chmod +x ${STEAMCMDDIR}/login.exp
-
-VOLUME ${STEAMCMDDIR}
-
-CMD ${STEAMCMDDIR}/start.sh
+CMD ${APPDIR}/entrypoint.sh
