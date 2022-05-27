@@ -17,6 +17,7 @@ RUN \
   apt-get -qq install -y \
     lib32gcc-s1 \
     wget \
+    expect \
   && mkdir -p ${APPDIR}/.steam/sdk32 \
   && mkdir -p ${APPDIR}/linux32 \
   && mkdir -p ${APPDIR}/linux64 \
