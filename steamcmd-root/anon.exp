@@ -3,7 +3,6 @@
 # exp_internal 1
 set timeout -1
 
-spawn /home/steam/steamcmd/steamcmd.sh \
+spawn /app/steamcmd.sh \
 	+login $env(STEAMCMD_USER) \
-	+force_install_dir $env(STEAMCMD_APP_INSTALL_DIR) \
 	+app_update $env(STEAMCMD_APP_ID) +quit
